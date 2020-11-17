@@ -64,6 +64,68 @@ def get_blog_articles(url_list):
 
 # Big thanks to Matt for his help getting me pointed in the right direction on this!
 
+# Getting all codeup blog urls in one function:
+def get_all_urls():
+    
+    url = 'https://codeup.com/resources/#blog'
+    
+    soup = make_soup(url)
+    
+    urls_list = soup.find_all('a', class_='jet-listing-dynamic-link__link')
+    
+    urls = {link.get('href') for link in urls_list}
+
+    urls = list(urls)
+        
+    return urls
+
+
+# This is the full function which looks through all of the codeup blog to retrieve the articles posted:
+
+def get_blog_articles(urls, cached=False):
+    '''
+    This function takes in a list of Codeup Blog urls and a parameter
+    with default cached == False which scrapes the title and text for each url, 
+    creates a list of dictionaries with the title and text for each blog, 
+    converts list to df, and returns df.
+    If cached == True, the function returns a df from a json file.
+    '''
+    if cached == True:
+        df = pd.read_json('big_blogs.json')
+        
+    # cached == False completes a fresh scrape for df     
+    else:
+
+        # Create an empty list to hold dictionaries
+        articles = []
+
+        # Loop through each url in our list of urls
+        for url in urls:
+
+            # Make request and soup object using helper
+            soup = make_soup(url)
+
+            # Save the title of each blog in variable title
+            title = soup.find('h1').text
+
+            # Save the text in each blog to variable text
+            content = soup.find('div', class_="jupiterx-post-content").text
+
+            # Create a dictionary holding the title and content for each blog
+            article = {'title': title, 'content': content}
+
+            # Add each dictionary to the articles list of dictionaries
+            articles.append(article)
+            
+        # convert our list of dictionaries to a df
+        df = pd.DataFrame(articles)
+
+        # Write df to a json file for faster access
+        df.to_json('big_blogs.json')
+    
+    return df
+
+
 
 # Using a function that allows one to feed the source URLs
 
@@ -96,6 +158,18 @@ def build_dataset(source_urls):
     df =  pd.DataFrame(news_data)
     df = df[['title', 'content', 'category']]
     return df
+
+# Create a helper function that requests and parses HTML returning a soup object.
+
+def make_soup(url):
+    '''
+    This helper function takes in a url and requests and parses HTML
+    returning a soup object.
+    '''
+    headers = {'User-Agent': 'Codeup Data Science'} 
+    response = get(url, headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    return soup
 
 
 # Solved function:
