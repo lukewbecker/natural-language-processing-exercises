@@ -97,4 +97,63 @@ def build_dataset(source_urls):
     df = df[['title', 'content', 'category']]
     return df
 
+
+# Solved function:
+
+def get_news_articles(cached=False):
+    '''
+    This function with default cached == False does a fresh scrape of inshort pages with topics 
+    business, sports, technology, and entertainment and writes the returned df to a json file.
+    cached == True returns a df read in from a json file.
+    '''
+    # option to read in a json file instead of scrape for df
+    if cached == True:
+        df = pd.read_json('articles.json')
+        
+    # cached == False completes a fresh scrape for df    
+    else:
+    
+        # Set base_url that will be used in get request
+        base_url = 'https://inshorts.com/en/read/'
+        
+        # List of topics to scrape
+        topics = ['business', 'sports', 'technology', 'entertainment']
+        
+        # Create an empty list, articles, to hold our dictionaries
+        articles = []
+
+        for topic in topics:
+            
+            # Create url with topic endpoint
+            topic_url = base_url + topic
+            
+            # Make request and soup object using helper
+            soup = make_soup(topic_url)
+
+            # Scrape a ResultSet of all the news cards on the page
+            cards = soup.find_all('div', class_='news-card')
+
+            # Loop through each news card on the page and get what we want
+            for card in cards:
+                title = card.find('span', itemprop='headline' ).text
+                author = card.find('span', class_='author').text
+                content = card.find('div', itemprop='articleBody').text
+
+                # Create a dictionary, article, for each news card
+                article = ({'topic': topic, 
+                            'title': title, 
+                            'author': author, 
+                            'content': content})
+
+                # Add the dictionary, article, to our list of dictionaries, articles.
+                articles.append(article)
+            
+        # Create a DataFrame from list of dictionaries
+        df = pd.DataFrame(articles)
+        
+        # Write df to json file for future use
+        df.to_json('articles.json')
+    
+    return df
+
 print("All acquire functions loaded properly.")
