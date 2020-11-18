@@ -11,3 +11,5 @@ package.json
 my_dictionary_simple.txt
 rapid_env.py
 anonymized-curriculum-access.txt
+*.jgp
+*.png
