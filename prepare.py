@@ -58,7 +58,7 @@ def stem(text):
 
 
 def lemmatize(string):
-    nltk.download('wordnet')
+    # nltk.download('wordnet')
 
 
     # Defining the lemmatizer:
@@ -91,7 +91,7 @@ def remove_stopwords(string, extra_words = [], exclude_words = []):
     return no_stopwords
 
 
-# Full prep function (per Faith's walkthrough):
+# Full prep function for codeup articles (per Faith's walkthrough):
 
 def prep_article_data(df, column, extra_words=[], exclude_words=[]):
 
