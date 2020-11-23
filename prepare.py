@@ -108,6 +108,15 @@ def prep_article_data(df, column, extra_words=[], exclude_words=[]):
     
     return df[['title', column, 'stemmed', 'lemmatized', 'clean']]
 
+def add_columns(df):
+    # add a column that is a list of each word for each repo 
+    words = [re.sub(r'([^a-z0-9\s]|\s.\s)', '', doc).split() for doc in df.clean] 
 
+    # column name will be words, and the column will contain lists of the words in each doc
+    df = pd.concat([df, pd.DataFrame({'words': words})], axis=1)
+
+    # add a column that shows the length 
+    df['doc_length'] = [len(wordlist) for wordlist in df.words]
+    return df
 
 print("All prepare functions successfully loaded.")
